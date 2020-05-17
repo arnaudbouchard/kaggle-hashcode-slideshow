@@ -1,6 +1,3 @@
-import numpy as np
-
-
 def check_slideshow_integrity(pictures, slideshow):
     """
     Test that slideshow is valid:
@@ -72,13 +69,9 @@ def submission_score(filename):
 def tag_sets_score(a, b):
     """ Given two sets of tags, calculate score """
     # tags both in a and b
-    intersection = set(a).intersection(b)
-    # tags in a NOT in b
-    a_unique = np.setdiff1d(a, b, assume_unique=True)
-    # tags in b NOT in a
-    b_unique = np.setdiff1d(b, a, assume_unique=True)
+    intersection = len(set(a).intersection(b))
     # calculate score: min of intersection, a_unique and b_unique
-    return min(len(intersection), len(a_unique), len(b_unique))
+    return min(intersection, len(a) - intersection, len(b) - intersection)
 
 
 def write_submission(slideshow):
