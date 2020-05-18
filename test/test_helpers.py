@@ -14,20 +14,20 @@ class TestHelpers(unittest.TestCase):
         Test that we can calculate the score of two sets
         """
         # test case were 2 tags in common + 3 uniques for each set
-        set1 = ['aaa', 'bbb', 'ccc', 'ddd', 'eee']
-        set2 = ['aaa', 'bbb', 'fff', 'ggg', 'hhh']
+        set1 = set(['aaa', 'bbb', 'ccc', 'ddd', 'eee'])
+        set2 = set(['aaa', 'bbb', 'fff', 'ggg', 'hhh'])
         score = hp.tag_sets_score(set1, set2)
         self.assertEqual(score, 2)
 
         # test case where 2 tags in common, 2 unique for set 1, 1 unique for set 2
-        set1 = ['aaa', 'bbb', 'ccc', 'ddd']
-        set2 = ['aaa', 'bbb', 'fff']
+        set1 = set(['aaa', 'bbb', 'ccc', 'ddd'])
+        set2 = set(['aaa', 'bbb', 'fff'])
         score = hp.tag_sets_score(set1, set2)
         self.assertEqual(score, 1)
 
         # test case where 0 tags in common
-        set1 = ['aaa', 'bbb', 'ccc', 'ddd']
-        set2 = ['eee', 'fff', 'ggg']
+        set1 = set(['aaa', 'bbb', 'ccc', 'ddd'])
+        set2 = set(['eee', 'fff', 'ggg'])
         score = hp.tag_sets_score(set1, set2)
         self.assertEqual(score, 0)
 
@@ -36,9 +36,9 @@ class TestHelpers(unittest.TestCase):
         Test that we can calculate the score for a slide
         """
         pictures = hp.load_pictures_from_file(filename=PICTURES_FILE)
-        slide1 = 1
-        slide2 = 2
-        score = hp.slide_score(pictures, slide1, slide2)
+        slideshow = [1, 2, 3, 0]
+        slide_index = 1
+        score = hp.slide_score(pictures, slideshow, slide_index)
         self.assertEqual(score, 1)
 
     def test_slideshow_score(self):

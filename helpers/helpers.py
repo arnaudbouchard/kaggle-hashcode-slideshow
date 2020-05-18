@@ -6,12 +6,7 @@ def check_slideshow_integrity(pictures, slideshow):
     - TODO: a slide can contain 1 or 2 vertical image(s)
     """
     for i in range(len(slideshow) - 1):
-        slide1 = slideshow[i]
-        slide2 = slideshow[i + 1]
-        if slide_score(pictures, slide1, slide2) < 1:
-            print(f'Slides {i} and {i+1} cannot be adjacents')
-            print(pictures[slide1])
-            print(pictures[slide2])
+        if slide_score(pictures, slideshow, i) < 1:
             return False
 
     return True
@@ -21,16 +16,41 @@ def load_pictures_from_file(filename='d_pet_pictures.txt', nb_lines=-1):
     """ Load pictures from Kaggle file """
     with open(filename, 'r') as file:
         lines = file.readlines()
-    return lines[1:] if nb_lines == -1 else lines[1:nb_lines + 1]
+
+    pictures = lines[1:] if nb_lines == -1 else lines[1:nb_lines + 1]
+
+    return [picture.rstrip().split(' ') for picture in pictures]
 
 
-def slide_score(pictures, i, j):
-    """ Given two picture indexes, calculate score """
-    # get both images data
-    n = pictures[i].rstrip().split(' ')[2:]
-    n_1 = pictures[j].rstrip().split(' ')[2:]
+def get_slide_tags(pictures, slideshow, index):
+    tags = []
+
+    if type(slideshow[index]) is tuple:
+        pic_1, pic_2 = slideshow
+        tags = pictures[pic_1][2:] + pictures[pic_2][2:]
+    else:
+        tags = pictures[slideshow[index]][2:]
+
+    return set(tags)
+
+
+def slide_score(pictures, slideshow, index):
+    """
+    Given a slide index, calculate score
+    Slide N score is the tag_sets_score of tags from slide N and slide N+1
+    """
+    # if last slide in slideshow, score is 0 (no next slide)
+    if slideshow[index] == slideshow[-1]:
+        return 0
+
+    # get tags for slide
+    tags_n = get_slide_tags(pictures, slideshow, index)
+
+    # get tags for next slide
+    tags_n1 = get_slide_tags(pictures, slideshow, index + 1)
+
     # return score
-    return tag_sets_score(n, n_1)
+    return tag_sets_score(tags_n, tags_n1)
 
 
 def slideshow_score(pictures, slideshow):
@@ -40,7 +60,7 @@ def slideshow_score(pictures, slideshow):
 
     # calculate slideshow score
     while index + 1 < lenght:
-        score += slide_score(pictures, slideshow[index], slideshow[index + 1])
+        score += slide_score(pictures, slideshow, index)
         index += 1
 
     return score
@@ -69,7 +89,7 @@ def submission_score(filename):
 def tag_sets_score(a, b):
     """ Given two sets of tags, calculate score """
     # tags both in a and b
-    intersection = len(set(a).intersection(b))
+    intersection = len(a.intersection(b))
     # calculate score: min of intersection, a_unique and b_unique
     return min(intersection, len(a) - intersection, len(b) - intersection)
 
