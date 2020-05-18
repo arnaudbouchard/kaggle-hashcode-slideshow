@@ -13,10 +13,23 @@ class TestHelpers(unittest.TestCase):
         """
         Test that we can calculate the score of two sets
         """
-        set1 = ['cat', 'garden', 'blue', 'sky', 'smile']
-        set2 = ['selfie', 'garden', 'smile', 'beach', 'chair']
+        # test case were 2 tags in common + 3 uniques for each set
+        set1 = ['aaa', 'bbb', 'ccc', 'ddd', 'eee']
+        set2 = ['aaa', 'bbb', 'fff', 'ggg', 'hhh']
         score = hp.tag_sets_score(set1, set2)
         self.assertEqual(score, 2)
+
+        # test case where 2 tags in common, 2 unique for set 1, 1 unique for set 2
+        set1 = ['aaa', 'bbb', 'ccc', 'ddd']
+        set2 = ['aaa', 'bbb', 'fff']
+        score = hp.tag_sets_score(set1, set2)
+        self.assertEqual(score, 1)
+
+        # test case where 0 tags in common
+        set1 = ['aaa', 'bbb', 'ccc', 'ddd']
+        set2 = ['eee', 'fff', 'ggg']
+        score = hp.tag_sets_score(set1, set2)
+        self.assertEqual(score, 0)
 
     def test_slide_score(self):
         """
