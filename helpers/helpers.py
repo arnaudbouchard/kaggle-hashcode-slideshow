@@ -6,6 +6,7 @@ def check_slideshow_integrity(pictures, slideshow):
     - a slide can contain 1 or 2 vertical image(s)
     """
     slideshow_len = len(slideshow)
+    used = []
 
     for i, slide in enumerate(slideshow):
         # two adjacent slides need at least 1 common tag. Last slide has score of 0 by design
@@ -13,12 +14,21 @@ def check_slideshow_integrity(pictures, slideshow):
             assert slide_score(pictures, slideshow, i) >= 1
 
         # slide can contain 1 horizontal image or (1 or 2) vertical images
+        # slide cannot contain image that's already been used
         if type(slide) is tuple:
+            assert slide[0] not in used
             assert pictures[slide[0]][0] == 'V'
+            used.append(slide[0])
+            assert slide[1] not in used
             assert pictures[slide[1]][0] == 'V'
+            used.append(slide[1])
         else:
+            assert slide not in used
             assert pictures[slide][0] == 'H'
+            used.append(slide)
 
+    print(
+        f'{len(used)}/{len(pictures)} images used for {len(slideshow)} slides')
     return True
 
 
@@ -50,7 +60,7 @@ def slide_score(pictures, slideshow, index):
     Slide N score is the tag_sets_score of tags from slide N and slide N+1
     """
     # if last slide in slideshow, score is 0 (no next slide)
-    if slideshow[index] == slideshow[-1]:
+    if index == len(slideshow) - 1:
         return 0
 
     # get tags for slide

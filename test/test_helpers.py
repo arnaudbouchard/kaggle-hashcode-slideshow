@@ -65,15 +65,18 @@ class TestHelpers(unittest.TestCase):
         Test that slideshow is valid
         """
         pictures = hp.load_pictures_from_file(filename=PICTURES_FILE)
-
         # non valid: slide 0 and 1 have no tags in common
         with self.assertRaises(AssertionError):
             hp.check_slideshow_integrity(pictures, [0, 4, 3])
         # non valid: slide 0 and 1 contain only 1 V picture
         with self.assertRaises(AssertionError):
             hp.check_slideshow_integrity(pictures, [1, 2, 3, 0])
+        # non valid: slide 2 and 3 contain same picture
+        with self.assertRaises(AssertionError):
+            hp.check_slideshow_integrity(pictures, [(1, 2), 3, 0, 3])
         # valid slideshow
-        self.assertTrue(hp.check_slideshow_integrity(pictures, [(1, 2), 3, 0]))
+        self.assertTrue(
+            hp.check_slideshow_integrity(pictures, [4, (1, 2), 3, 0]))
 
 
 if __name__ == '__main__':
