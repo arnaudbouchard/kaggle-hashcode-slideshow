@@ -2,12 +2,25 @@ def check_slideshow_integrity(pictures, slideshow):
     """
     Test that slideshow is valid:
     - two adjacent slides have at least 1 common tag
-    - TODO: a slide can contain max 1 horizontal image
-    - TODO: a slide can contain 1 or 2 vertical image(s)
+    - a slide can contain max 1 horizontal image
+    - a slide can contain 1 or 2 vertical image(s)
     """
-    for i in range(len(slideshow) - 1):
-        if slide_score(pictures, slideshow, i) < 1:
-            return False
+    slideshow_len = len(slideshow)
+
+    try:
+        for i, slide in enumerate(slideshow):
+            # two adjacent slides need at least 1 common tag. Last slide has score of 0 by design
+            if i < slideshow_len - 1:
+                assert slide_score(pictures, slideshow, i) >= 1
+
+            # slide can contain 1 horizontal image or (1 or 2) vertical images
+            if type(slide) is tuple:
+                assert pictures[slide[0]][0] == 'V'
+                assert pictures[slide[1]][0] == 'V'
+            else:
+                assert pictures[slide][0] == 'H'
+    except AssertionError:
+        return False
 
     return True
 
@@ -26,7 +39,7 @@ def get_slide_tags(pictures, slideshow, index):
     tags = []
 
     if type(slideshow[index]) is tuple:
-        pic_1, pic_2 = slideshow
+        pic_1, pic_2 = slideshow[index]
         tags = pictures[pic_1][2:] + pictures[pic_2][2:]
     else:
         tags = pictures[slideshow[index]][2:]
@@ -78,6 +91,7 @@ def submission_score(filename):
     nb_slides, slideshow = int(lines[0]), lines[1:]
 
     # convert slideshow to list
+    # TODO: doesn't work with 2 V images (tuple)
     slideshow = [int(slide.rstrip()) for slide in slideshow]
 
     # get score
@@ -100,5 +114,8 @@ def write_submission(slideshow):
         # number of images
         file.write(f'{len(slideshow)}\n')
 
-        for pic in slideshow:
-            file.write(f'{pic}\n')
+        for slide in slideshow:
+            if type(slide) is tuple:
+                file.write(f'{slide[0]} {slide[1]}\n')
+            else:
+                file.write(f'{slide}\n')

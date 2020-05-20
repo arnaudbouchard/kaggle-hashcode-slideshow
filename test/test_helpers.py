@@ -36,9 +36,13 @@ class TestHelpers(unittest.TestCase):
         Test that we can calculate the score for a slide
         """
         pictures = hp.load_pictures_from_file(filename=PICTURES_FILE)
+        # slide with 1 horizontal image
         slideshow = [1, 2, 3, 0]
-        slide_index = 1
-        score = hp.slide_score(pictures, slideshow, slide_index)
+        score = hp.slide_score(pictures, slideshow, 1)
+        self.assertEqual(score, 1)
+        # slide with 2 vertical images
+        slideshow = [(1, 2), 3, 0]
+        score = hp.slide_score(pictures, slideshow, 0)
         self.assertEqual(score, 1)
 
     def test_slideshow_score(self):
@@ -55,13 +59,13 @@ class TestHelpers(unittest.TestCase):
         Test that slideshow is valid
         """
         pictures = hp.load_pictures_from_file(filename=PICTURES_FILE)
-        non_valid_slideshow = [0, 1, 2, 3]
-        valid_slideshow = [1, 2, 3, 0]
 
-        self.assertFalse(
-            hp.check_slideshow_integrity(pictures, non_valid_slideshow))
-        self.assertTrue(hp.check_slideshow_integrity(pictures,
-                                                     valid_slideshow))
+        # non valid: slide 0 and 1 have no tags in common
+        self.assertFalse(hp.check_slideshow_integrity(pictures, [0, 4, 3]))
+        # non valid: slide 0 and 1 contain only 1 V picture
+        self.assertFalse(hp.check_slideshow_integrity(pictures, [1, 2, 3, 0]))
+        # valid slideshow
+        self.assertTrue(hp.check_slideshow_integrity(pictures, [(1, 2), 3, 0]))
 
 
 if __name__ == '__main__':
