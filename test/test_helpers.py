@@ -5,7 +5,7 @@ from helpers import helpers as hp
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 PICTURES_FILE = os.path.join(THIS_DIR, 'test_pictures.txt')
-SUBMISSION_FILE = 'test_submission.txt'
+SUBMISSION_FILE = os.path.join(THIS_DIR, 'test_submission.txt')
 
 
 class TestHelpers(unittest.TestCase):
@@ -54,6 +54,12 @@ class TestHelpers(unittest.TestCase):
         score = hp.slideshow_score(pictures, slideshow)
         self.assertEqual(score, 3)
 
+    def test_submission_score(self):
+        pictures = hp.load_pictures_from_file(filename=PICTURES_FILE)
+        nb_slides, score = hp.submission_score(pictures, SUBMISSION_FILE)
+        self.assertEqual(nb_slides, 4)
+        self.assertEqual(score, 3)
+
     def test_check_slideshow_integrity(self):
         """
         Test that slideshow is valid
@@ -61,9 +67,11 @@ class TestHelpers(unittest.TestCase):
         pictures = hp.load_pictures_from_file(filename=PICTURES_FILE)
 
         # non valid: slide 0 and 1 have no tags in common
-        self.assertFalse(hp.check_slideshow_integrity(pictures, [0, 4, 3]))
+        with self.assertRaises(AssertionError):
+            hp.check_slideshow_integrity(pictures, [0, 4, 3])
         # non valid: slide 0 and 1 contain only 1 V picture
-        self.assertFalse(hp.check_slideshow_integrity(pictures, [1, 2, 3, 0]))
+        with self.assertRaises(AssertionError):
+            hp.check_slideshow_integrity(pictures, [1, 2, 3, 0])
         # valid slideshow
         self.assertTrue(hp.check_slideshow_integrity(pictures, [(1, 2), 3, 0]))
 

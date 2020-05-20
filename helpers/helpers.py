@@ -7,20 +7,17 @@ def check_slideshow_integrity(pictures, slideshow):
     """
     slideshow_len = len(slideshow)
 
-    try:
-        for i, slide in enumerate(slideshow):
-            # two adjacent slides need at least 1 common tag. Last slide has score of 0 by design
-            if i < slideshow_len - 1:
-                assert slide_score(pictures, slideshow, i) >= 1
+    for i, slide in enumerate(slideshow):
+        # two adjacent slides need at least 1 common tag. Last slide has score of 0 by design
+        if i < slideshow_len - 1:
+            assert slide_score(pictures, slideshow, i) >= 1
 
-            # slide can contain 1 horizontal image or (1 or 2) vertical images
-            if type(slide) is tuple:
-                assert pictures[slide[0]][0] == 'V'
-                assert pictures[slide[1]][0] == 'V'
-            else:
-                assert pictures[slide][0] == 'H'
-    except AssertionError:
-        return False
+        # slide can contain 1 horizontal image or (1 or 2) vertical images
+        if type(slide) is tuple:
+            assert pictures[slide[0]][0] == 'V'
+            assert pictures[slide[1]][0] == 'V'
+        else:
+            assert pictures[slide][0] == 'H'
 
     return True
 
@@ -79,10 +76,8 @@ def slideshow_score(pictures, slideshow):
     return score
 
 
-def submission_score(filename):
+def submission_score(pictures, filename):
     """ Calculate score of submission file """
-    # load pictures
-    pictures = load_pictures_from_file()
     # read submission file
     with open(filename, 'r') as file:
         lines = file.readlines()
@@ -91,11 +86,19 @@ def submission_score(filename):
     nb_slides, slideshow = int(lines[0]), lines[1:]
 
     # convert slideshow to list
-    # TODO: doesn't work with 2 V images (tuple)
-    slideshow = [int(slide.rstrip()) for slide in slideshow]
+    slideshow_list = []
+
+    for slide in slideshow:
+        slide = slide.rstrip().split(' ')
+        if len(slide) == 2:
+            slide = tuple([int(slide[0]), int(slide[1])])
+        else:
+            slide = int(slide[0])
+
+        slideshow_list.append(slide)
 
     # get score
-    score = slideshow_score(pictures, slideshow)
+    score = slideshow_score(pictures, slideshow_list)
 
     return nb_slides, score
 
