@@ -47,11 +47,22 @@ def get_slide_tags(pictures, slideshow, index):
 
     if type(slideshow[index]) is tuple:
         pic_1, pic_2 = slideshow[index]
-        tags = pictures[pic_1][2:] + pictures[pic_2][2:]
+        tags = set(pictures[pic_1][2:]).union(pictures[pic_2][2:])
     else:
-        tags = pictures[slideshow[index]][2:]
+        tags = set(pictures[slideshow[index]][2:])
 
-    return set(tags)
+    return tags
+
+
+def pair_verticals(pictures):
+    # TODO: optimize pairs. Some ideas: no/low # of common tags, maximize pair # of tags
+    paired = []
+
+    for i in range(0, len(pictures) - 1, 2):
+        pair = (pictures[i], pictures[i + 1])
+        paired.append(pair)
+
+    return paired
 
 
 def slide_score(pictures, slideshow, index):

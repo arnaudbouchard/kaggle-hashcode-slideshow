@@ -9,6 +9,39 @@ SUBMISSION_FILE = os.path.join(THIS_DIR, 'test_submission.txt')
 
 
 class TestHelpers(unittest.TestCase):
+    def test_pair_verticals(self):
+        pictures = [
+            ['V', '4', 'aaa', 'bbb', 'ccc', 'ddd'],
+            ['V', '3', 'aaa', 'bbb', 'ddd'],
+            ['V', '4', 'aaa', 'bbb', 'ccc', 'eee'],
+            ['V', '2', 'aaa', 'eee'],
+            ['V', '6', 'aaa', 'eee', 'fff', 'bbb', 'ccc', 'ddd'],
+        ]
+
+        verticals = [i for i, pic in enumerate(pictures) if pic[0] == 'V']
+
+        paired = hp.pair_verticals(verticals)
+        used = []
+
+        # check that each element is a tuple of 2 different integers
+        for pair in paired:
+            # check that each element is a tuple of size 2
+            self.assertEqual(type(pair), tuple)
+            self.assertEqual(len(pair), 2)
+            # check that each element of tuple is an int
+            self.assertEqual(type(pair[0]), int)
+            self.assertEqual(type(pair[1]), int)
+            # check that each picture in tuple are different
+            self.assertFalse(pair[0] == pair[1])
+            # check that each picture correspond to an index in pictures
+            self.assertTrue(pair[0] < len(pictures))
+            self.assertTrue(pair[1] < len(pictures))
+            # check that pictures aren't used twice
+            self.assertTrue(pair[0] not in used)
+            self.assertTrue(pair[1] not in used)
+            # add pictures to "used" set
+            used.extend([pair[0], pair[1]])
+
     def test_tag_sets_score(self):
         """
         Test that we can calculate the score of two sets

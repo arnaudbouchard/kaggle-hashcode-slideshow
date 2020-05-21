@@ -1,4 +1,5 @@
 from helpers import helpers as hp
+import random
 import time
 import os
 
@@ -8,64 +9,80 @@ SUBMISSION_FILE = 'submission.txt'
 
 
 def main():
+    # define our parameters
+    first_picture_nb_tags = 10
+    nb_candidates = 100
+
+    # start timing
+    start = time.perf_counter()
+
     # Read our input
-    pictures = hp.load_pictures_from_file(filename=PICTURES_FILE, nb_lines=100)
+    pictures = hp.load_pictures_from_file(filename=PICTURES_FILE)
 
-    min_score = 1
+    # work only with H pictures for now
+    horizontals = [i for i, pic in enumerate(pictures) if pic[0] == 'H']
+    verticals = [i for i, pic in enumerate(pictures) if pic[0] == 'V']
+
+    remaining = horizontals + hp.pair_verticals(verticals)
+
+    # delete horizontals & verticals
+    del horizontals, verticals
+
+    # intialize slideshow
     slideshow = []
-    reserve = []
 
-    for i in range(len(pictures)):
-        # for first image
-        if len(slideshow) == 0:
-            slideshow.append(i)
-            continue
+    # look for our first picture with min first_picture_nb_tags tags
+    for pic in remaining:
+        # get tags (use get_slide_tags with "fake" slideshow of 1 picture)
+        tags = hp.get_slide_tags(pictures, [pic], 0)
 
-        # if by appending to slideshow the score of this slide is at min min_score
-        if hp.slide_score(pictures, slideshow[-1], i) >= min_score:
-            slideshow.append(i)
-        else:
-            reserve.append(i)
+        if len(tags) <= first_picture_nb_tags:
+            slideshow.append(pic)
+            remaining.remove(pic)
+            break
 
-    hp.write_submission(slideshow)
-    start = time.perf_counter()
-    slides, score = hp.submission_score('submission.txt')
+    # intialize a "tried" set
+    tried = set()
+
+    # try to assign all pictures / tuple of pictures
+    while len(remaining) > 0 and tried != set(remaining):
+        # choose random nb_candidates pictures
+        candidates = random.sample(remaining, min(nb_candidates,
+                                                  len(remaining)))
+
+        # look for best candidates
+        max_score = 0
+        best_candidate = None
+
+        for cand in candidates:
+            # get score if candidate was to be added at end of slideshow
+            score = hp.slide_score(pictures, slideshow + [cand], -2)
+
+            if score == 0:
+                tried.add(cand)
+                remaining.remove(cand)
+            elif score > max_score:
+                max_score = score
+                best_candidate = cand
+
+        # append best candidate to slideshow, if any, then remove from remaining pictures
+        if best_candidate is not None:
+            slideshow.append(best_candidate)
+            remaining.remove(best_candidate)
+            # reinitialize tried pictures
+            remaining.extend(tried)
+            if len(remaining) % 1000 == 0:
+                print(f'Elapsed time: {time.perf_counter() - start} seconds')
+                print(f'Remaining: {len(remaining)}')
+            tried = set()
+
+    # print results
+    print(f'Built slideshow in: {time.perf_counter() - start} seconds')
     print(
-        f'Score of {score} for {slides} slides, calculated in {time.perf_counter() - start}'
+        f'Slideshow integrity: {hp.check_slideshow_integrity(pictures, slideshow)}'
     )
-    print('-' * 40)
-
-    # insert reserve images
-    res_i = 0
-
-    while res_i < len(reserve):
-        i = 0
-
-        while i + 1 < len(slideshow):
-            before_score = hp.slide_score(pictures, slideshow[i],
-                                          slideshow[i + 1])
-            after_score = hp.slide_score(pictures, reserve[res_i],
-                                         slideshow[i + 1])
-
-            if after_score >= before_score:
-                slideshow.insert(i + 1, reserve[res_i])
-                del reserve[res_i]
-                res_i = 0
-                break
-
-            i += 1
-        res_i += 1
-
-    # write submission, calc score
-    print(
-        f'Slideshow is valid: {hp.check_slideshow_integrity(pictures, slideshow)}'
-    )
-    hp.write_submission(slideshow)
-    start = time.perf_counter()
-    slides, score = hp.submission_score('submission.txt')
-    print(
-        f'Score of {score} for {slides} slides, calculated in {time.perf_counter() - start}'
-    )
+    print(f'Slideshow score: {hp.slideshow_score(pictures, slideshow)}')
+    print(f'Total runtime: {time.perf_counter() - start} seconds')
 
 
 if __name__ == '__main__':
