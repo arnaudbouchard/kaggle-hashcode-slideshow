@@ -12,8 +12,8 @@ def main():
     # define our parameters
     first_picture_nb_tags = 20
     pairing_params = {'min_tags': 15, 'max_tags': 30, 'nb_candidates': 100}
-    nb_candidates = 200
-    nb_lignes = 10000  # for when testing on subset of pictures
+    nb_candidates = 100
+    nb_lignes = 1000  # for when testing on subset of pictures
     acceptable_score = 20
 
     # start timing
@@ -35,11 +35,8 @@ def main():
     verticals = hp.pair_verticals(pictures, verticals, pairing_params)
 
     # assemble H and V pictures
-    remaining = horizontals + verticals
+    remaining = set(horizontals + verticals)
     print('Picture set built')
-
-    # shuffle pictures
-    random.shuffle(remaining)
 
     # delete horizontals & verticals
     del horizontals, verticals
@@ -61,7 +58,7 @@ def main():
     tried = set()
 
     # try to assign all pictures / tuple of pictures
-    while len(remaining) > 0 and tried != set(remaining):
+    while len(remaining) > 0 and tried != remaining:
         # store tags of slideshow's last slide
         last_tags = hp.get_slide_tags(pictures, slideshow, -1)
 
@@ -97,7 +94,7 @@ def main():
             slideshow.append(best_candidate)
             remaining.remove(best_candidate)
             # reinitialize tried pictures
-            remaining.extend(tried)
+            remaining.update(tried)
             tried = set()
             # display progress
             if len(remaining) % 1000 == 0:
