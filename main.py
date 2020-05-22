@@ -10,11 +10,11 @@ SUBMISSION_FILE = 'submission.txt'
 
 def main():
     # define our parameters
-    first_picture_nb_tags = 10
-    pairing_candidates = 1000
-    nb_candidates = 200
+    first_picture_nb_tags = 20
+    pairing_params = {'min_tags': 15, 'max_tags': 30, 'nb_candidates': 100}
+    nb_candidates = 500
     nb_lignes = -1  # for when testing on subset of pictures
-    acceptable_score = 6
+    acceptable_score = 20
 
     # start timing
     start = time.perf_counter()
@@ -32,14 +32,14 @@ def main():
     print('H/V splitted')
 
     # pair vertical pictures
-    verticals = hp.pair_verticals(pictures, verticals, pairing_candidates)
+    verticals = hp.pair_verticals(pictures, verticals, pairing_params)
 
     # assemble H and V pictures
     remaining = horizontals + verticals
     print('Picture set built')
 
     # shuffle pictures
-    # TODO:
+    random.shuffle(remaining)
 
     # delete horizontals & verticals
     del horizontals, verticals
@@ -90,10 +90,11 @@ def main():
             remaining.remove(best_candidate)
             # reinitialize tried pictures
             remaining.extend(tried)
+            tried = set()
+            # display progress
             if len(remaining) % 1000 == 0:
                 print(f'Elapsed time: {time.perf_counter() - start} seconds')
                 print(f'Remaining: {len(remaining)}')
-            tried = set()
 
     # print results
     print(f'Built slideshow in: {time.perf_counter() - start} seconds')

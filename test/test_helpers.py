@@ -19,8 +19,9 @@ class TestHelpers(unittest.TestCase):
         ]
 
         verticals = [i for i, pic in enumerate(pictures) if pic[0] == 'V']
+        pairing_params = {'min_tags': 1, 'max_tags': 30, 'nb_candidates': 100}
 
-        paired = hp.pair_verticals(pictures, verticals)
+        paired = hp.pair_verticals(pictures, verticals, pairing_params)
         used = []
 
         # check that each element is a tuple of 2 different integers

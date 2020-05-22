@@ -57,8 +57,12 @@ def get_slide_tags(pictures, slideshow, index):
     return tags
 
 
-def pair_verticals(pictures, remaining, nb_candidates):
+def pair_verticals(pictures, remaining, params):
     paired = []
+
+    min_tags = params['min_tags']
+    max_tags = params['max_tags']
+    nb_candidates = params['nb_candidates']
 
     # try to pair all pictures
     while len(remaining) > 1:
@@ -71,6 +75,7 @@ def pair_verticals(pictures, remaining, nb_candidates):
 
         # look for best candidates
         min_common = 1000
+        pair_tags = 0
         best_candidate = None
 
         for cand in candidates:
@@ -80,12 +85,17 @@ def pair_verticals(pictures, remaining, nb_candidates):
             # calc # of common tags
             commons = len(curr_tags.intersection(cand_tags))
 
-            if commons == 0:
+            # try to evenly distribute # tags in resulting pictures
+            total_tags = len(cand_tags) + len(curr_tags) - commons
+
+            if commons == 0 and total_tags >= min_tags and total_tags <= max_tags:
                 best_candidate = cand
                 break
-            elif commons < min_common:
+            elif commons < min_common or (commons == min_common
+                                          and total_tags > pair_tags):
                 min_common = commons
                 best_candidate = cand
+                pair_tags = total_tags
 
         # pair current picture with best candidate
         if best_candidate is not None:
