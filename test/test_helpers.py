@@ -20,7 +20,7 @@ class TestHelpers(unittest.TestCase):
 
         verticals = [i for i, pic in enumerate(pictures) if pic[0] == 'V']
 
-        paired = hp.pair_verticals(verticals)
+        paired = hp.pair_verticals(pictures, verticals)
         used = []
 
         # check that each element is a tuple of 2 different integers

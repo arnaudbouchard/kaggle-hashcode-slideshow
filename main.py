@@ -11,19 +11,35 @@ SUBMISSION_FILE = 'submission.txt'
 def main():
     # define our parameters
     first_picture_nb_tags = 10
-    nb_candidates = 100
+    pairing_candidates = 1000
+    nb_candidates = 200
+    nb_lignes = -1  # for when testing on subset of pictures
+    acceptable_score = 6
 
     # start timing
     start = time.perf_counter()
 
     # Read our input
-    pictures = hp.load_pictures_from_file(filename=PICTURES_FILE)
+    pictures = hp.load_pictures_from_file(filename=PICTURES_FILE,
+                                          nb_lines=nb_lignes)
 
-    # work only with H pictures for now
+    print(f'{len(pictures)} pictures loaded')
+
+    # separate H and V pictures
     horizontals = [i for i, pic in enumerate(pictures) if pic[0] == 'H']
     verticals = [i for i, pic in enumerate(pictures) if pic[0] == 'V']
 
-    remaining = horizontals + hp.pair_verticals(verticals)
+    print('H/V splitted')
+
+    # pair vertical pictures
+    verticals = hp.pair_verticals(pictures, verticals, pairing_candidates)
+
+    # assemble H and V pictures
+    remaining = horizontals + verticals
+    print('Picture set built')
+
+    # shuffle pictures
+    # TODO:
 
     # delete horizontals & verticals
     del horizontals, verticals
@@ -58,7 +74,10 @@ def main():
             # get score if candidate was to be added at end of slideshow
             score = hp.slide_score(pictures, slideshow + [cand], -2)
 
-            if score == 0:
+            if score >= acceptable_score:
+                best_candidate = cand
+                break
+            elif score == 0:
                 tried.add(cand)
                 remaining.remove(cand)
             elif score > max_score:
@@ -83,6 +102,8 @@ def main():
     )
     print(f'Slideshow score: {hp.slideshow_score(pictures, slideshow)}')
     print(f'Total runtime: {time.perf_counter() - start} seconds')
+    print('Writing slideshow...')
+    hp.write_submission(slideshow)
 
 
 if __name__ == '__main__':

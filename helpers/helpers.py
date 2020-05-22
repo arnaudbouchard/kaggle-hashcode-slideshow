@@ -1,3 +1,6 @@
+import random
+
+
 def check_slideshow_integrity(pictures, slideshow):
     """
     Test that slideshow is valid:
@@ -54,13 +57,42 @@ def get_slide_tags(pictures, slideshow, index):
     return tags
 
 
-def pair_verticals(pictures):
-    # TODO: optimize pairs. Some ideas: no/low # of common tags, maximize pair # of tags
+def pair_verticals(pictures, remaining, nb_candidates):
     paired = []
 
-    for i in range(0, len(pictures) - 1, 2):
-        pair = (pictures[i], pictures[i + 1])
-        paired.append(pair)
+    # try to pair all pictures
+    while len(remaining) > 1:
+        # current picture tags
+        curr_tags = get_slide_tags(pictures, [remaining[0]], 0)
+
+        # choose random nb_candidates pictures
+        candidates = random.sample(remaining[1:],
+                                   min(nb_candidates, len(remaining[1:])))
+
+        # look for best candidates
+        min_common = 1000
+        best_candidate = None
+
+        for cand in candidates:
+            # get candidate tags
+            cand_tags = get_slide_tags(pictures, [cand], 0)
+
+            # calc # of common tags
+            commons = len(curr_tags.intersection(cand_tags))
+
+            if commons == 0:
+                best_candidate = cand
+                break
+            elif commons < min_common:
+                min_common = commons
+                best_candidate = cand
+
+        # pair current picture with best candidate
+        if best_candidate is not None:
+            pair = (remaining[0], cand)
+            paired.append(pair)
+            remaining.remove(cand)
+            remaining.pop(0)
 
     return paired
 
