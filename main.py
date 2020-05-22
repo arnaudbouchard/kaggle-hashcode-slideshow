@@ -12,8 +12,8 @@ def main():
     # define our parameters
     first_picture_nb_tags = 20
     pairing_params = {'min_tags': 15, 'max_tags': 30, 'nb_candidates': 100}
-    nb_candidates = 500
-    nb_lignes = -1  # for when testing on subset of pictures
+    nb_candidates = 200
+    nb_lignes = 10000  # for when testing on subset of pictures
     acceptable_score = 20
 
     # start timing
@@ -62,6 +62,9 @@ def main():
 
     # try to assign all pictures / tuple of pictures
     while len(remaining) > 0 and tried != set(remaining):
+        # store tags of slideshow's last slide
+        last_tags = hp.get_slide_tags(pictures, slideshow, -1)
+
         # choose random nb_candidates pictures
         candidates = random.sample(remaining, min(nb_candidates,
                                                   len(remaining)))
@@ -69,10 +72,13 @@ def main():
         # look for best candidates
         max_score = 0
         best_candidate = None
+        best_cand_tags = 999
 
         for cand in candidates:
             # get score if candidate was to be added at end of slideshow
-            score = hp.slide_score(pictures, slideshow + [cand], -2)
+            # score = hp.slide_score(pictures, slideshow + [cand], -2)
+            cand_tags = hp.get_slide_tags(pictures, [cand], 0)
+            score = hp.tag_sets_score(last_tags, cand_tags)
 
             if score >= acceptable_score:
                 best_candidate = cand
@@ -80,9 +86,11 @@ def main():
             elif score == 0:
                 tried.add(cand)
                 remaining.remove(cand)
-            elif score > max_score:
+            elif score > max_score or (score > 0 and score == max_score
+                                       and len(cand_tags) < best_cand_tags):
                 max_score = score
                 best_candidate = cand
+                best_cand_tags = len(cand_tags)
 
         # append best candidate to slideshow, if any, then remove from remaining pictures
         if best_candidate is not None:
