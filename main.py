@@ -1,5 +1,6 @@
 from helpers import helpers as hp
 import random
+from random import randrange
 import time
 import os
 
@@ -15,6 +16,7 @@ def main():
     nb_candidates = 3500
     nb_lignes = -1  # for when testing on subset of pictures
     acceptable_score = 20
+    interval_search = 1000
 
     # start timing
     start = time.perf_counter()
@@ -107,12 +109,43 @@ def main():
                 print(f'Elapsed time: {time.perf_counter() - start} seconds')
                 print(f'Remaining: {len(remaining)}')
 
-    # print results
-    print(f'Built slideshow in: {time.perf_counter() - start} seconds')
-    print(
-        f'Slideshow integrity: {hp.check_slideshow_integrity(pictures, slideshow)}'
-    )
+    print('-' * 40)
     print(f'Slideshow score: {hp.slideshow_score(pictures, slideshow)}')
+    print('Save slideshow in case fails later')
+    hp.write_submission(slideshow)
+
+    # try to insert remaining pictures in slideshow
+    slideshow_len = len(slideshow)
+
+    for pic in tried:
+        # pick a random index in slideshow
+        rdm_i = randrange(0, max(0, slideshow_len - interval_search))
+
+        # look for best place to insert in range rdm_i + interval_search
+        best_i = None
+        best_score = 0
+
+        for i in range(rdm_i, max(rdm_i + interval_search, slideshow_len)):
+            # check score of index slide, index slide after insert, inserted slide score
+            s_before = hp.slide_score(pictures, slideshow, i)
+            s_after = hp.slide_score(pictures, slideshow[:i + 1] + [pic], -2)
+            s_new = hp.slide_score(pictures, [pic] + slideshow[i + 1:], 0)
+            score_increase = s_new + s_after - s_before
+
+            if score_increase > best_score:
+                best_i = i
+                best_score = score_increase
+
+        # insert at best index (maximum score gain)
+        if best_score > 0:
+            slideshow = slideshow[:best_i + 1] + [pic] + slideshow[best_i + 1:]
+            slideshow_len += 1
+
+    print(f'Built slideshow in: {time.perf_counter() - start} seconds')
+    print(f'Slideshow score: {hp.slideshow_score(pictures, slideshow)}')
+    print('-' * 40)
+    # print results
+    print(f'Integrity: {hp.check_slideshow_integrity(pictures, slideshow)}')
     print(f'Total runtime: {time.perf_counter() - start} seconds')
     print('Writing slideshow...')
     hp.write_submission(slideshow)
