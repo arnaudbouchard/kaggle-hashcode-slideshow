@@ -112,8 +112,14 @@ def slide_score(pictures, slideshow, index):
     Given a slide index, calculate score
     Slide N score is the tag_sets_score of tags from slide N and slide N+1
     """
+    max_index = len(slideshow) - 1
+
     # if last slide in slideshow, score is 0 (no next slide)
-    if index == len(slideshow) - 1:
+    if index == max_index:
+        return 0
+
+    # if index out of slideshow, return 0
+    if index < 0 or index > max_index:
         return 0
 
     # get tags for slide
