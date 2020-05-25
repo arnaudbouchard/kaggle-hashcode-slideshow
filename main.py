@@ -22,8 +22,7 @@ def main():
     start = time.perf_counter()
 
     # Read our input
-    pictures = hp.load_pictures_from_file(filename=PICTURES_FILE,
-                                          nb_lines=nb_lignes)
+    pictures = hp.load_pictures_from_file(filename=PICTURES_FILE, nb_lines=nb_lignes)
 
     print(f'{len(pictures)} pictures loaded')
 
@@ -67,8 +66,7 @@ def main():
         treshold_score = min(acceptable_score, (len(last_tags) // 2) + 1)
 
         # choose random nb_candidates pictures
-        candidates = random.sample(remaining, min(nb_candidates,
-                                                  len(remaining)))
+        candidates = random.sample(remaining, min(nb_candidates, len(remaining)))
 
         # look for best candidates
         max_score = 0
@@ -89,8 +87,7 @@ def main():
             elif score == 0:
                 tried.add(cand)
                 remaining.remove(cand)
-            elif score > max_score or (score > 0 and score == max_score
-                                       and len(cand_tags) < best_cand_tag_len):
+            elif score > max_score or (score > 0 and score == max_score and len(cand_tags) < best_cand_tag_len):
                 max_score = score
                 best_candidate = cand
                 best_cand_tags = cand_tags

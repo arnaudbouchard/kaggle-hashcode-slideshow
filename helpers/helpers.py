@@ -70,8 +70,7 @@ def pair_verticals(pictures, remaining, params):
         curr_tags = get_slide_tags(pictures, [remaining[0]], 0)
 
         # choose random nb_candidates pictures
-        candidates = random.sample(remaining[1:],
-                                   min(nb_candidates, len(remaining[1:])))
+        candidates = random.sample(remaining[1:], min(nb_candidates, len(remaining[1:])))
 
         # look for best candidates
         min_common = 1000
@@ -91,8 +90,7 @@ def pair_verticals(pictures, remaining, params):
             if commons == 0 and total_tags >= min_tags and total_tags <= max_tags:
                 best_candidate = cand
                 break
-            elif commons < min_common or (commons == min_common
-                                          and total_tags > pair_tags):
+            elif commons < min_common or (commons == min_common and total_tags > pair_tags):
                 min_common = commons
                 best_candidate = cand
                 pair_tags = total_tags
